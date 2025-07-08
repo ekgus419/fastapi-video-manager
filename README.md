@@ -1,9 +1,6 @@
 # 🚀 Video Management Server
 
-FastAPI, SQLAlchemy, PostgreSQL 기반의 비동기 동영상 관리 서버입니다.
-기업/회원/영상 CRUD, 인증, 스트리밍, 포인트 지급, Soft Delete, 유료 복구 기능을 포함합니다.
-
-이 프로젝트는 **FastAPI**, **SQLAlchemy**, **PostgreSQL** 기반의 **비동기 동영상 관리 서버**입니다.
+이 프로젝트는 **FastAPI**, **SQLAlchemy**, **PostgreSQL** 기반의 **비동기 동영상 관리 서버**입니다.  
 기업/회원/영상 CRUD, 인증, 스트리밍, 포인트 지급, Soft Delete, 유료 복구 기능 등을 포함하고 있습니다.
 
 ### 🔄 기능 체크리스트
@@ -306,7 +303,8 @@ return StreamingResponse(content=response.aiter_bytes(), media_type="video/mp4")
 **"포인트 지급 API에서 동시성 이슈를 어떻게 해결했는지, 그 이유는?"**
 
 영상 스트리밍 API에서는 동시에 여러 요청이 발생할 수 있기 때문에,  
-**같은 회원가 동일한 영상을 중복 요청할 경우 포인트가 이중 지급되거나, 시청 로그가 중복 삽입될 수 있는 문제가 발생할 수 있습니다.**  
+**같은 회원가 동일한 영상을 중복 요청할 경우 포인트가 이중 지급되거나,  
+시청 로그가 중복 삽입될 수 있는 문제가 발생할 수 있습니다.**   
 이를 방지하기 위해 `/stream/{video_id}` 라우터에서는 다음과 같은 **DB 트랜잭션 기반 제약 방어** 방식을 사용했습니다:  
 
 1. `video_view_log` 테이블에 대해 `(user_id, video_id)`에 **UNIQUE 제약 조건**을 추가합니다.
