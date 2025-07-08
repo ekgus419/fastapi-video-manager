@@ -1,0 +1,52 @@
+### /auth/login API를 통해 받은 토큰을 admin_access_token, access_token을 사용 부탁드립니다.
+### corporation_id는 응답을 참고하여 동적으로 조정 부탁드립니다. (예: 1번 기업).
+### plan_expire_at은 null 또는 "YYYY-MM-DDTHH:MM:SS" 형식으로 설정 가능.
+
+
+### 🏢 기업 생성 (최초 관리자 계정 포함)
+POST http://localhost:80/v1/corporations
+Content-Type: application/json
+
+{
+  "name": "루먼랩",
+  "plan": "PAID",
+  "plan_expire_at": "2099-12-31T00:00:00",
+  "admin_email": "admin@lumanlab.com",
+  "admin_password": "password123"
+}
+
+###
+
+### 🔍 기업 이름으로 조회 (루먼랩 -> URL 인코딩 적용)
+GET http://localhost:80/v1/corporations/%EB%A3%A8%EB%A8%BC%EB%9E%A9
+Authorization: Bearer {{admin_access_token}}
+
+###
+
+### 🔍 기업 ID로 조회
+GET http://localhost:80/v1/corporations/id/1
+Authorization: Bearer {{admin_access_token}}
+
+###
+
+### 📋 전체 기업 목록 조회
+GET http://localhost:80/v1/corporations
+Authorization: Bearer {{admin_access_token}}
+
+###
+
+### ✏️ 기업 정보 수정 (플랜 변경 등)
+PUT http://localhost:80/v1/corporations/1
+Content-Type: application/json
+Authorization: Bearer {{admin_access_token}}
+
+{
+  "plan": "PAID",
+  "plan_expire_at": null
+}
+
+###
+
+### ❌ 기업 삭제
+DELETE http://localhost:80/v1/corporations/1
+Authorization: Bearer {{admin_access_token}}

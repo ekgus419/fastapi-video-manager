@@ -1,0 +1,18 @@
+### 🔐 로그인
+POST http://localhost:80/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@lumanlab.com",
+  "password": "password123"
+}
+
+### 🔁 Refresh Token 갱신 (Access Token 재발급)
+POST http://localhost:80/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": {{access_token}}
+}
+
+

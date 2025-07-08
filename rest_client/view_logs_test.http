@@ -1,0 +1,17 @@
+### 👁️ 사용자의 특정 영상 시청 여부 확인 (data: True/False)
+GET http://localhost:80/v1/view-logs/1/1
+Authorization: Bearer {{access_token}}
+
+# 2: user_id
+# 1: video_id
+
+###
+
+### 📝 시청 로그 생성 (스트리밍 외부에서도 호출 가능)
+POST http://localhost:80/v1/view-logs
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "video_id": 1
+}

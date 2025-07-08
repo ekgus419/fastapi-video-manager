@@ -1,0 +1,3 @@
+### 🔁 사용자별 Refresh Token 조회 (use access token)
+GET http://localhost:80/v1/tokens/1
+Authorization: Bearer {{access_token}}

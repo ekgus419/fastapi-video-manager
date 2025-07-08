@@ -1,0 +1,46 @@
+### ➕ 회원 생성 (관리자 또는 시스템 등록)
+POST http://localhost:80/v1/users
+Content-Type: application/json
+
+{
+  "email": "guest1@lumanlab.com",
+  "password": "guest1234",
+  "role": "guest",
+  "point": 0,
+  "corporation_id": 1
+}
+
+###
+
+### 👤 이메일로 회원 조회
+GET http://localhost:80/v1/users/guest1@lumanlab.com
+Authorization: Bearer {{access_token}}
+
+###
+
+### 🔍 회원 ID로 조회
+GET http://localhost:80/v1/users/id/2
+Authorization: Bearer {{access_token}}
+
+###
+
+### 📋 전체 회원 목록 조회
+GET http://localhost:80/v1/users
+Authorization: Bearer {{access_token}}
+
+###
+
+### ✏️ 회원 정보 수정 (본인 or 관리자)
+PUT http://localhost:80/v1/users/2
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "password": "newpass1234"
+}
+
+###
+
+### ❌ 회원 삭제 (본인 or 관리자)
+DELETE http://localhost:80/v1/users/2
+Authorization: Bearer {{access_token}}

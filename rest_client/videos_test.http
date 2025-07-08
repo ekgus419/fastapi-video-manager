@@ -1,0 +1,58 @@
+### 🎬 영상 등록 (관리자 전용)
+POST http://localhost:80/v1/videos
+Content-Type: application/json
+Authorization: Bearer {{admin_access_token}}
+
+{
+  "name": "샘플 영상",
+  "file_path": "https://example.com/sample.mp4",
+  "corporation_id": 1
+}
+
+###
+
+### 📋 전체 영상 목록 조회
+GET http://localhost:80/v1/videos
+Authorization: Bearer {{access_token}}
+
+###
+
+### 🏢 기업별 영상 목록 조회
+GET http://localhost:80/v1/videos/1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 🔍 영상 단건 조회
+GET http://localhost:80/v1/videos/id/1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 📡 영상 스트리밍 (10포인트 지급)
+GET http://localhost:80/v1/videos/stream/1
+Authorization: Bearer {{access_token}}
+
+###
+
+### ✏️ 영상 수정 (관리자 전용)
+PUT http://localhost:80/v1/videos/1
+Content-Type: application/json
+Authorization: Bearer {{admin_access_token}}
+
+{
+  "name": "수정된 영상명",
+  "file_path": "https://example.com/updated.mp4"
+}
+
+###
+
+### ❌ 영상 삭제 (관리자 전용)
+DELETE http://localhost:80/v1/videos/1
+Authorization: Bearer {{admin_access_token}}
+
+###
+
+### ♻️ 삭제된 영상 복구 (유료 플랜 기업 관리자만 가능)
+PUT http://localhost:80/v1/videos/1/restore
+Authorization: Bearer {{admin_access_token}}

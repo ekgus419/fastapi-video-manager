@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: fastapi-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lumanlab_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+    container_name: fastapi-backend
+    command: /start.sh
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:latest
+    container_name: fastapi-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
