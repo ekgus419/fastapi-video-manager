@@ -108,6 +108,49 @@
 
 ---
 
+## 📂 프로젝트 아키텍처 ERD (Mermaid)
+
+FastAPI 기반 프로젝트의 패키지 계층 구조에 따라
+HTTP 요청이 처리되는 전체 흐름을 시퀀스 형태로 시각화한 것입니다.
+각 패키지는 실제 디렉토리(src/)에 존재하는 모듈로, 책임과 데이터 흐름에 따라 연결됩니다.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Router as routers/
+    participant DTO as dto/
+    participant Service as service/
+    participant Mapper as mapper/
+    participant Repository as repository/
+    participant Entity as entity/
+    participant DB as PostgreSQL
+    participant Exception as exception/
+
+    Client->>Router: HTTP 요청
+    Router->>DTO: Request DTO 파싱
+    Router->>Service: 요청 전달
+    Service->>Mapper: domain_to_entity(request)
+    Mapper->>Repository: 저장/조회
+    Repository->>Entity: ORM 조작
+    Entity->>DB: SQL 실행
+    DB-->>Entity: 결과 반환
+    Entity-->>Repository: ORM 객체 반환
+    Repository-->>Mapper: entity_to_domain(entity)
+    Mapper-->>Service: Domain 반환
+    Service-->>DTO: Response DTO 생성
+    DTO-->>Router: 직렬화 응답
+    Router-->>Client: HTTP 응답 반환
+
+    alt 예외 발생 시
+        Service->>Exception: raise CustomException
+        Exception-->>Router: 예외 처리
+        Router-->>Client: 오류 응답 반환
+    end
+
+```
+
+---
+
 ## 📂 ERD 아키텍처 (Mermaid)
 
 ▶ **Corporation**: 기업 정보 / 유료 여부 / 기한 관리  
