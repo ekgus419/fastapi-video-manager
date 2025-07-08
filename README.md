@@ -1,14 +1,16 @@
 # 🚀 Video Management Server
 
 FastAPI, SQLAlchemy, PostgreSQL 기반의 비동기 동영상 관리 서버입니다.
+기업/회원/영상 CRUD, 인증, 스트리밍, 포인트 지급, Soft Delete, 유료 복구 기능을 포함합니다.
 
-기업 · 유저 · 영상 CRUD, 인증, 스트리밍, 포인트 지급, Soft Delete, 유료 복구 기능을 포함합니다.
+이 프로젝트는 **FastAPI**, **SQLAlchemy**, **PostgreSQL** 기반의 **비동기 동영상 관리 서버**입니다.
+기업/회원/영상 CRUD, 인증, 스트리밍, 포인트 지급, Soft Delete, 유료 복구 기능 등을 포함하고 있습니다.
 
 ### 🔄 기능 체크리스트
 
 | 기능 | 구현 여부 |
 | --- | --- |
-| 기업/유저/영상 CRUD | ✅ |
+| 기업/회원/영상 CRUD | ✅ |
 | 유료/무료 플랜 및 기한 관리 | ✅ |
 | soft delete 및 복구 | ✅ |
 | JWT 로그인(access + refresh) | ✅ |
@@ -19,13 +21,18 @@ FastAPI, SQLAlchemy, PostgreSQL 기반의 비동기 동영상 관리 서버입�
 | Alembic 또는 SQL Schema 파일 | ✅ |
 | .http 테스트 제공 | ✅ |
 
+
+프로젝트와 관련된 추가적인 정보는 아래 문서에서 확인하실 수 있습니다:  
+- [API 문서](README_API_DESC.md): API 사용법 및 엔드포인트에 대한 설명을 제공합니다.
+- [테스트 문서](README_TEST.md): 테스트 케이스 및 테스트 방법을 다룹니다.
+
 ---
 
 ## ✅ 프로젝트 개요
 
-- 기업, 유저, 영상 리소스를 비동기 API로 관리
+- 기업, 회원, 영상 리소스를 비동기 API로 관리
 - JWT 기반 인증 시스템 (access/refresh token)
-- 영상 스트리밍 요청 시 유저에게 포인트 지금
+- 영상 스트리밍 요청 시 회원에게 포인트 지금
 - 유료 플랜 기업만 soft delete 된 영상 복구 가능
 - Docker + Alembic 기반 인프라 및 마이그리션
 - REST Client 기반 HTTP 테스트 스크립트 제공
@@ -109,7 +116,7 @@ FastAPI, SQLAlchemy, PostgreSQL 기반의 비동기 동영상 관리 서버입�
 ▶ **Corporation**: 기업 정보 / 유료 여부 / 기한 관리  
 ▶ **User**: admin or guest / 기업 / 포인트  
 ▶ **Video**: 영상 메타정보 / 삭제 여부  
-▶ **VideoViewLog**: 유저의 영상 시청 로그  
+▶ **VideoViewLog**: 회원의 영상 시청 로그  
 ▶ **RefreshToken**: 리프레시 토큰 관리  
 
 ```mermaid
@@ -299,7 +306,7 @@ return StreamingResponse(content=response.aiter_bytes(), media_type="video/mp4")
 **"포인트 지급 API에서 동시성 이슈를 어떻게 해결했는지, 그 이유는?"**
 
 영상 스트리밍 API에서는 동시에 여러 요청이 발생할 수 있기 때문에,  
-**같은 유저가 동일한 영상을 중복 요청할 경우 포인트가 이중 지급되거나, 시청 로그가 중복 삽입될 수 있는 문제가 발생할 수 있습니다.**  
+**같은 회원가 동일한 영상을 중복 요청할 경우 포인트가 이중 지급되거나, 시청 로그가 중복 삽입될 수 있는 문제가 발생할 수 있습니다.**  
 이를 방지하기 위해 `/stream/{video_id}` 라우터에서는 다음과 같은 **DB 트랜잭션 기반 제약 방어** 방식을 사용했습니다:  
 
 1. `video_view_log` 테이블에 대해 `(user_id, video_id)`에 **UNIQUE 제약 조건**을 추가합니다.
