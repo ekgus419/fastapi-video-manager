@@ -295,8 +295,8 @@ docker-compose down
 
 - `rest_client/` 디렉터리 내 `.http` 파일들을 통해 테스트
 
-1. 파이참 실행 → 재생 아이콘 통해 실행 가능
-![image](https://github.com/user-attachments/assets/7c60b39a-4558-415f-acaa-0f270598ec3a)  
+1. 파이참 실행 → 재생 아이콘 통해 실행 가능  
+    ![image](https://github.com/user-attachments/assets/7c60b39a-4558-415f-acaa-0f270598ec3a)  
 
 2. VSCode에 REST Client 확장 설치
 - VSCode를 열고 좌측 사이드바에서 확장(Extensions) 탭 클릭
