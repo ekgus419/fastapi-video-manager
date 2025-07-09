@@ -11,7 +11,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # netcat-openbsd로 설치 (netcat은 가상 패키지라서 안 됨)
-RUN apt update && apt install -y netcat-openbsd
+# RUN apt update && apt install -y netcat-openbsd
+RUN apt-get update && apt-get install -y netcat-traditional
 
 # 나머지 소스코드 전체 복사
 COPY . .
