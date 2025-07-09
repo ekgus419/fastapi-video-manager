@@ -293,10 +293,20 @@ docker-compose down
 
 ## 🥮 API 테스트
 
-- `rest_client/` 디렉터리 내 `.http` 파일들을 VSCode REST Client 바탕으로 다운로드 가능
-- 파이참 실행 → Uvicorn 실행 → 재생 아이콘 통해 실행 가능
-![image](https://github.com/user-attachments/assets/7c60b39a-4558-415f-acaa-0f270598ec3a)
+- `rest_client/` 디렉터리 내 `.http` 파일들을 통해 테스트
 
+1. 파이참 실행 → 재생 아이콘 통해 실행 가능
+    ![image](https://github.com/user-attachments/assets/7c60b39a-4558-415f-acaa-0f270598ec3a)
+
+2. VSCode에 REST Client 확장 설치
+- VSCode를 열고 좌측 사이드바에서 확장(Extensions) 탭 클릭
+- REST Client 검색
+- Huachao Mao가 만든 확장 프로그램 설치
+- 또는 아래 명령어로 설치할 수 있음 (VSCode 터미널에서):
+
+```
+code --install-extension humao.rest-client
+```
 
 ## 🔐 인증 방식
 
