@@ -28,7 +28,8 @@ def get_user_service(repo: UserRepository = Depends(get_user_repository)) -> Use
 def get_corporation_repository() -> CorporationRepository:
     return CorporationRepository()
 
-def get_corporation_service(repo: CorporationRepository = Depends(get_corporation_repository)) -> CorporationService:
+def get_corporation_service() -> CorporationService:
+    repo = get_corporation_repository()
     return CorporationService(repo)
 
 
