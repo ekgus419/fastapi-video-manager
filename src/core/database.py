@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from contextlib import asynccontextmanager
 from sqlalchemy.engine.url import URL
 from src.core.settings import settings
 
@@ -24,6 +25,7 @@ async_session = async_sessionmaker(
 )
 
 # FastAPI 의존성 주입용
+@asynccontextmanager
 async def get_db_session() -> AsyncSession:
     async with async_session() as session:
         yield session
