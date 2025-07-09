@@ -347,32 +347,69 @@ return StreamingResponse(content=response.aiter_bytes(), media_type="video/mp4")
 
 **"포인트 지급 API에서 동시성 이슈를 어떻게 해결했는지, 그 이유는?"**
 
-영상 스트리밍 API에서는 동시에 여러 요청이 발생할 수 있기 때문에,  
-**같은 회원가 동일한 영상을 중복 요청할 경우 포인트가 이중 지급되거나,  
-시청 로그가 중복 삽입될 수 있는 문제가 발생할 수 있습니다.**   
-이를 방지하기 위해 `/stream/{video_id}` 라우터에서는 다음과 같은 **DB 트랜잭션 기반 제약 방어** 방식을 사용했습니다:  
+## 🔁 동영상 시청 시 포인트 지급 – 동시성 처리 방식 개선
 
-1. `video_view_log` 테이블에 대해 `(user_id, video_id)`에 **UNIQUE 제약 조건**을 추가합니다.
-2. 시청 로그 생성 시 **중복 삽입이 발생하면 `IntegrityError` 예외가 발생**하도록 설계합니다.
-3. 포인트 지급 로직은 **시청 로그 삽입이 성공한 경우에만 실행**되도록 `try/except` + `else` 구문으로 안전하게 분기합니다.
+### 📌 요구사항 요약
+
+> "유저가 영상을 시청할 때마다 10포인트를 정확히 지급해야 하며, 동시에 여러 요청이 와도 중복 지급 없이 처리되어야 한다."
+
+---
+
+### ✅ Before (초기 구현 및 문제점)
 
 ```
+# router 내부 예시
 try:
-    await video_view_log_service.create_log(db, current_user.id, video_id)
+    await video_view_log_service.create_log(db, user_id, video_id)
 except IntegrityError:
-    await db.rollback()  # 중복 시청 → 무시
+    await db.rollback()
 else:
-    await user_service.add_point(db, current_user.id, 10)
+    await user_service.add_point(db, user_id, 10)
 ```
 
-이 구조를 통해,
+- ✅ **설계 의도**
+    - 영상 시청 로그 기록과 포인트 지급을 **하나의 트랜잭션으로 묶어**
+        
+        “1회 요청당 정확히 10포인트 지급”을 보장하고자 했음.
+        →  **로그 생성과 포인트 지급을 한 트랜잭션에서 관리**
+        
+- ❌ **구현상 문제**
+    - 실제 구현에서 `create_log()`와 `add_point()`가 각각 **별도의 서비스에서 `commit()`을 수행**
+    - 이로 인해 **트랜잭션 경계가 분리**되어 의도한 **원자성(Atomicity)** 이 무너짐
+    - 각각의 트랜잭션에서 따로 처리되므로 **포인트가 중복 지급될 가능성 있음**
 
-- 🔒 **시청 로그가 1회만 생성되도록 보장**하고
-- 💰 **포인트도 1회만 지급**되도록 제어할 수 있으며
-- ⚙️ **DB가 동시성 충돌을 방어해주는 역할**을 수행합니다.
+---
 
-또한 SQLAlchemy의 **비동기 세션**은 이벤트 루프 기반으로 작동하지만,  
-**트랜잭션 단위의 원자성은 그대로 유지**되기 때문에,  
-일반적인 수준의 동시 요청에서는 안정적으로 동작합니다.  
+### ✅ After (개선된 구현 및 동시성 보장)
 
-💡 트래픽이 큰 환경에서는 Redis 분산 락, Row-Level Lock, 비동기 메시지 큐 등 추가적인 대안도 고려할 수 있습니다.
+```python
+async with db.begin():  # 트랜잭션 시작
+    await video_view_log_service.create_log(db, user_id, video_id, commit=False)
+    await user_service.add_point(db, user_id, 10, commit=False)
+# 트랜잭션 블록이 예외 없이 종료되면 → 자동 commit
+# 예외 발생 시 → 자동 rollback
+```
+
+### 🔧 개선된 구조 설명
+
+1. **트랜잭션 일관성 보장**
+    - `async with db.begin():`을 사용하여 **시청 로그 저장 + 포인트 지급**을 단일 트랜잭션으로 묶음
+    - 둘 중 하나라도 실패하면 전체 rollback → **정합성 유지**
+2. **서비스 내부 `commit()` 제거**
+    - `create_log()`, `add_point()`는 모두 `commit=False` 파라미터를 받아 상위 계층에서 트랜잭션을 통제
+    - **트랜잭션 경계를 라우터 또는 상위 서비스 계층에서 책임지도록 설계 변경**
+    - 이로써 **트랜잭션이 분리되지 않고 원자성 보장**
+3. **중복 요청 방지 (DB-level 제약)**
+
+```
+__table_args__ = (
+    UniqueConstraint("user_id", "video_id", name="uq_user_video_once"),
+)
+```
+
+- `video_view_log` 테이블에 다음과 같이 **UNIQUE 제약조건을 활용**
+    - 동일 유저가 동일 영상에 대해 중복 시청 요청을 보내도, **오직 한 요청만 INSERT 성공**
+    - 나머지 요청은 `IntegrityError` 예외로 처리되어 **rollback**됨 → 포인트 중복 지급 없음
+- 동시 요청이 발생하더라도 PostgreSQL의 트랜잭션 및 MVCC 구조에 의해
+    - 하나의 요청만 성공적으로 시청 로그 + 포인트 지급
+    - 나머지는 DB 충돌로 자동 실패 (정합성 보장)
