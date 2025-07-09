@@ -25,7 +25,11 @@ async_session = async_sessionmaker(
 )
 
 # FastAPI 의존성 주입용
-@asynccontextmanager
 async def get_db_session() -> AsyncSession:
+    async with async_session() as session:
+        yield session
+
+@asynccontextmanager
+async def get_scheduler_db_session() -> AsyncSession:
     async with async_session() as session:
         yield session
